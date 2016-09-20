@@ -53,16 +53,9 @@
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
   <PropertyGroup>
     <NuSpecFile>$(MSBuildProjectDirectory)\SHFB.MoveWebsiteFiles.nuspec</NuSpecFile>
-    <NuGetVersion>1.0.0</NuGetVersion>
+    <NuGetVersion>1.0.1</NuGetVersion>
   </PropertyGroup>
   <ItemGroup>
     <NuGetInput Include="$(MSBuildThisFile)" />

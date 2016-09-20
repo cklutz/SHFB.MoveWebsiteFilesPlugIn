@@ -31,8 +31,8 @@ using System.Runtime.InteropServices;
 internal static partial class AssemblyInfo
 {
     // Product version
-    public const string ProductVersion = "1.0.0.0";
+    public const string ProductVersion = "1.0.1.0";
 
     // Assembly copyright information
-    public const string Copyright = "Copyright \xA9 2016, Christian Klutz, All Rights Reserved.";
+    public const string Copyright = "Copyright \xA9 2016, cklutz, All Rights Reserved.";
 }

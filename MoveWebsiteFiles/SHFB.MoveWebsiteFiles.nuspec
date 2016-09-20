@@ -17,9 +17,9 @@
     <licenseUrl>https://opensource.org/licenses/MIT</licenseUrl>
     <projectUrl>https://github.com/cklutz/SHFB.MoveWebsiteFilesPlugIn</projectUrl>
     <releaseNotes></releaseNotes>
-    <tags>SHFB Sandcastle Help File Builder</tags>
+    <tags>SHFB Sandcastle</tags>
   </metadata>
   <files>
-    <file src="*.dll" target="tools" />
+    <file src="MoveWebSiteFiles.dll" target="tools" />
   </files>
 </package>
