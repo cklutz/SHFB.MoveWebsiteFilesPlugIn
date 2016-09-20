@@ -1,0 +1,25 @@
+﻿<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+  <metadata>
+    <id>SHFB.MoveWebsiteFiles</id>
+    <summary>A plugin for the Sandcastle Help File Builder that moves the website files, instead of copying them</summary>
+    <description>
+      A plugin for the Sandcastle Help File Builder that moves the website files, instead of copying them.
+      This should speed up the build process for large websites.
+    </description>
+    <dependencies>
+    </dependencies>
+
+    <language>en-US</language>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <version>$currentVersion$</version>
+    <authors>cklutz</authors>
+    <licenseUrl>https://opensource.org/licenses/MIT</licenseUrl>
+    <projectUrl>https://github.com/cklutz/SHFB.MoveWebsiteFilesPlugIn</projectUrl>
+    <releaseNotes></releaseNotes>
+    <tags>SHFB Sandcastle Help File Builder</tags>
+  </metadata>
+  <files>
+    <file src="*.dll" target="tools" />
+  </files>
+</package>
