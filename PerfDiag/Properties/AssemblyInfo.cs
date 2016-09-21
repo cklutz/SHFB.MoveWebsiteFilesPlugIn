@@ -4,10 +4,10 @@ using System.Resources;
 using System.Runtime.InteropServices;
 
 // General assembly information
-[assembly: AssemblyProduct("MoveWebsiteFiles")]
-[assembly: AssemblyTitle("MoveWebsiteFiles")]
+[assembly: AssemblyProduct("PerfDiagPlugIn")]
+[assembly: AssemblyTitle("PerfDiagPlugIn")]
 [assembly: AssemblyDescription("A plug-in for use with the Sandcastle Help File Builder")]
-[assembly: AssemblyCompany("cklutz")]
+[assembly: AssemblyCompany("")]
 [assembly: AssemblyCopyright(AssemblyInfo.Copyright)]
 [assembly: AssemblyCulture("")]
 #if DEBUG
@@ -31,7 +31,7 @@ using System.Runtime.InteropServices;
 internal static partial class AssemblyInfo
 {
     // Product version
-    public const string ProductVersion = "1.0.2.0";
+    public const string ProductVersion = "1.0.0.0";
 
     // Assembly copyright information
     public const string Copyright = "Copyright \xA9 2016, cklutz, All Rights Reserved.";

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Windows.Forms;
@@ -15,12 +16,14 @@ namespace MoveWebsiteFiles
         "MoveWebsiteFiles",
         Version = AssemblyInfo.ProductVersion,
         Copyright = AssemblyInfo.Copyright,
-        Description = "MoveWebsiteFiles plug-in")]
+        Description = "A plugin for the Sandcastle Help File Builder that moves the website files, instead of copying them.",
+        IsConfigurable = true)]
     public sealed class MoveWebsiteFilesPlugIn : IPlugIn
     {
         private readonly HelpFileBuilderPlugInExportAttribute _metadata;
         private List<ExecutionPoint> _executionPoints;
         private BuildProcess _builder;
+        private ConfigurationData _configurationData;
 
         public MoveWebsiteFilesPlugIn()
         {
@@ -56,8 +59,14 @@ namespace MoveWebsiteFiles
         /// <remarks>The configuration data will be stored in the help file builder project</remarks>
         public string ConfigurePlugIn(SandcastleProject project, string currentConfig)
         {
-            MessageBox.Show("This plug-in has no configurable settings", _metadata.Id,
-                MessageBoxButtons.OK, MessageBoxIcon.Information);
+            var configuration = ConfigurationData.FromXml(project, currentConfig);
+            using (var form = new ConfigurationForm(configuration))
+            {
+                if (form.ShowDialog() == DialogResult.OK)
+                {
+                    return ConfigurationData.ToXml(form.NewConfiguration);
+                }
+            }
 
             return currentConfig;
         }
@@ -71,6 +80,7 @@ namespace MoveWebsiteFiles
         {
             _builder = buildProcess;
             _builder.ReportProgress("{0} Version {1}\r\n{2}", _metadata.Id, _metadata.Version, _metadata.Copyright);
+            _configurationData = ConfigurationData.FromXml(buildProcess.CurrentProject, configuration);
         }
 
         /// <summary>
@@ -81,58 +91,61 @@ namespace MoveWebsiteFiles
         {
             if (context.BuildStep == BuildStep.CopyingWebsiteFiles)
             {
-                _builder.ReportProgress("Moving website files...");
-
-                string workingFolder = _builder.WorkingFolder;
                 string outputFolder = _builder.OutputFolder;
-                string webWorkingFolder = String.Format(CultureInfo.InvariantCulture, "{0}Output\\{1}", workingFolder, HelpFileFormats.Website);
+                string workingFolder = _builder.WorkingFolder;
+                string webWorkingFolder = string.Format(CultureInfo.InvariantCulture, "{0}Output\\{1}", workingFolder, HelpFileFormats.Website);
 
-                int fileCount = 0;
-                RecursiveMove(webWorkingFolder + "\\*.*", outputFolder, ref fileCount);
-                _builder.ReportProgress("Moved {0} files for the webiste content", fileCount);
+                _builder.ReportProgress("Moving website files from '{0}' to '{1}'...", webWorkingFolder, outputFolder);
+
+                var sw = Stopwatch.StartNew();
+                if (_configurationData.UseDirectMove)
+                {
+                    DirectMove(webWorkingFolder, outputFolder);
+                    sw.Stop();
+                    _builder.ReportProgress("Moved files for the website content in {0}.", sw.Elapsed);
+                }
+                else
+                {
+                    int fileCount = 0;
+                    ManualMove(webWorkingFolder, outputFolder, ref fileCount);
+                    sw.Stop();
+                    _builder.ReportProgress("Moved {0} files for the website content in {1}.", fileCount, sw.Elapsed);
+                }
             }
         }
 
-        private void RecursiveMove(string sourcePath, string destPath, ref int fileCount)
+        private static void DirectMove(string sourcePath, string destPath)
         {
-            if (sourcePath == null)
-                throw new ArgumentNullException("sourcePath");
+            if (!Directory.Exists(destPath))
+                Directory.CreateDirectory(destPath);
 
-            if (destPath == null)
-                throw new ArgumentNullException("destPath");
-
-            int idx = sourcePath.LastIndexOf('\\');
-
-            string dirName = sourcePath.Substring(0, idx), fileSpec = sourcePath.Substring(idx + 1);
-
-            foreach (string name in Directory.EnumerateFiles(dirName, fileSpec))
+            foreach (var entry in Directory.EnumerateDirectories(sourcePath))
             {
-                var filename = destPath + Path.GetFileName(name);
+                Directory.Move(entry, Path.Combine(destPath, Path.GetFileName(entry)));
+            }
+            foreach (var entry in Directory.EnumerateFiles(sourcePath))
+            {
+                File.Move(entry, Path.Combine(destPath, Path.GetFileName(entry)));
+            }
+       }
 
+        private void ManualMove(string sourcePath, string destPath, ref int fileCount)
+        {
+            foreach (string name in Directory.EnumerateFiles(sourcePath))
+            {
                 if (!Directory.Exists(destPath))
                     Directory.CreateDirectory(destPath);
 
-                // All attributes are turned off so that we can delete it later
-                File.Move(name, filename);
-                File.SetAttributes(filename, FileAttributes.Normal);
-
+                File.Move(name, Path.Combine(destPath, Path.GetFileName(name)));
                 fileCount++;
 
                 if ((fileCount % 500) == 0)
                     _builder.ReportProgress("Moved {0} files", fileCount);
             }
 
-            // For "*.*", copy subfolders too
-            if (fileSpec == "*.*")
+            foreach (string folder in Directory.EnumerateDirectories(sourcePath))
             {
-                // Ignore hidden folders as they may be under source control and are not wanted
-                foreach (string folder in Directory.EnumerateDirectories(dirName))
-                {
-                    if ((File.GetAttributes(folder) & FileAttributes.Hidden) != FileAttributes.Hidden)
-                    {
-                        RecursiveMove(folder + @"\*.*", destPath + folder.Substring(dirName.Length + 1) + @"\", ref fileCount);
-                    }
-                }
+                ManualMove(folder, Path.Combine(destPath, Path.GetFileName(folder)), ref fileCount);
             }
         }
 
